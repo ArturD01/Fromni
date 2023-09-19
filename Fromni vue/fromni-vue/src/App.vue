@@ -118,10 +118,8 @@ export default {
     updateChannels(event) {
     const value = event.target.value;
     if (event.target.checked) {
-      // Если чекбокс выбран, добавьте значение в массив
       this.newCampaign.channels.push(value);
     } else {
-      // Если чекбокс снят, удалите значение из массива (если оно там есть)
       const index = this.newCampaign.channels.indexOf(value);
       if (index !== -1) {
         this.newCampaign.channels.splice(index, 1);
