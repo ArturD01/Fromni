@@ -24,25 +24,7 @@ let resultJson;
 // Telegram
 const token = '5575087374:AAFvUj5HnmgAy8H6kYii5I9IZGLN7iRrm8w'
 const bot = new TelegramApi (token, {polling:true})
-bot.on('message', async (msg) => {
-    const myColl = database.collection('campaigns');
-    const { text, chat } = msg;
-      const newMessage = {
-        user: "p2",
-        text: text,
-        timestamp: new Date(),
-      };
-      const query = {
-        name: "ArtQo",
-        "channels.name": "Telegram",
-      };
-      const update = {
-        $push: {
-          "channels.$.messages": newMessage,
-        },
-      };
-      const result = await myColl.updateOne(query, update);  
-});
+
 
 
 
@@ -58,8 +40,7 @@ app.get('/api/getCampaigns', async (req, res) => {
 app.post('/api/addCampaign', async (req, res) => {
   try {
     const myColl = database.collection('campaigns');
-     // const newCampaign = req.body; // Данные Кампании из формы
-     // Преобразуйте массив каналов в массив объектов
+     // const newCampaign = req.body;
      const channels = req.body.channels.map(channelName => {
       return {
         name: channelName,
@@ -67,24 +48,20 @@ app.post('/api/addCampaign', async (req, res) => {
         buttons:[]
       };
     });
-    // Создайте объект newCampaign
     const newCampaign = {
       name: req.body.campaignsName,
       channels: channels,
     };
     const result = await myColl.insertOne(newCampaign);
-   // Отправить успешный ответ с добавленными данными
-   // res.status(201).json(result.ops[0]);
   } catch (error) {
     console.error('Ошибка при добавлении Кампании:', error);
-    // Отправить ошибку клиенту
     res.status(500).json({ error: 'Произошла ошибка при добавлении Кампании' });
   }
 });
 // Отправка сообщений
 app.post('/api/addMessage', async (req, res) => {
     const myColl = database.collection('campaigns');
-    const { campaignName, channelName, channelMessage,inline_keyboard} = req.body; // Добавьте параметр buttons
+    const { campaignName, channelName, channelMessage,inline_keyboard} = req.body;
 
     if (channelName == "Telegram") {
       const channel_id = 5536300885;   
@@ -120,24 +97,41 @@ app.post('/api/addButton', async (req, res) => {
       text: buttonText,
     };
     const query = {
-      name: campaignName, // Преобразуем campaignId в ObjectId
+      name: campaignName, 
       "channels.name": channelName,
     };
     const update = {
       $push: {
-        "channels.$.buttons": newButton, // Добавляем кнопку к каналу
+        "channels.$.buttons": newButton,
       },
     };
     const result = await myColl.updateOne(query, update);
-    // Отправить успешный ответ с добавленными данными
     res.status(201).json(result);
   } catch (error) {
     console.error('Ошибка при добавлении кнопки:', error);
-    // Отправить ошибку клиенту
     res.status(500).json({ error: 'Произошла ошибка при добавлении кнопки' });
   }
 });
 
+bot.on('message', async (msg) => {
+  const myColl = database.collection('campaigns');
+  const { text, chat } = msg;
+    const newMessage = {
+      user: "p2",
+      text: text,
+      timestamp: new Date(),
+    };
+    const query = {
+      name: "ArtQo",
+      "channels.name": "Telegram",
+    };
+    const update = {
+      $push: {
+        "channels.$.messages": newMessage,
+      },
+    };
+    const result = await myColl.updateOne(query, update);  
+});
 
 app.listen(3000, async () => {
   try {
